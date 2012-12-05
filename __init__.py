@@ -4,7 +4,8 @@ import numpy.ma
 import math
 import scipy.stats
 #import SRA_sub
-import FFT
+import FFT_gen
+import SRA_gen
 
 def get_corr(cube):
 	bins=int(pow(cube.shape[0]/2.,2) + pow(cube.shape[1]/2.,2) + pow(cube.shape[2]/2.,2) + 1)
@@ -52,10 +53,10 @@ class LRF_cube:
 		self.cube_shape=(self.cube_size,self.cube_size,self.cube_size)
 
 		if method=="FFT":
-			self.cube=FFT.cube_make_FFT(self.half_cube_size, self.beta)
+			self.cube=FFT_gen.cube_make_FFT(self.half_cube_size, self.beta)
 
 		elif method=="SRA":
-			self.cube=cube_make_SRA(self.res, sigma, (self.beta-3)/2. )
+			self.cube=SRA_gen.cube_make_SRA(self.res, sigma, (self.beta-3)/2. )
 
 	def normalise(self):
 
