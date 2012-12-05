@@ -94,8 +94,8 @@ class LRF_cube:
 		cubeB=numpy.append(cubeA, cubeA[:,:size,:], axis=1)
 		cube2=numpy.append(cubeB, cubeB[:,:,:size], axis=2)
 
-		for i in range(cube.shape[0]):
-			for j in range(cube.shape[1]):
-				for k in range(cube.shape[2]):
+		for i in range(self.cube.shape[0]):
+			for j in range(self.cube.shape[1]):
+				for k in range(self.cube.shape[2]):
 					self.means_array[i,j,k]=numpy.mean(cube2[i:i+size,j:j+size,k:k+size])
 
