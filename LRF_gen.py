@@ -3,7 +3,7 @@ import numpy.fft
 import numpy.ma
 import math
 import scipy.stats
-import SRA_sub
+#import SRA_sub
 
 def get_corr(cube):
 	bins=int(pow(cube.shape[0]/2.,2) + pow(cube.shape[1]/2.,2) + pow(cube.shape[2]/2.,2) + 1)
@@ -63,7 +63,7 @@ class LRF_cube:
 		self.cube-=m
 		self.cube/=s
 
-	def dump_cube(self,filename):
+	def dump(self,filename):
 
 		fileobj=open(filename, "w")
 
@@ -74,6 +74,9 @@ class LRF_cube:
 					fileobj.write("%i\t%i\t%i\t%.3f\n" %(i,j,k,self.cube[i,j,k]))
 
 		fileobj.close()
+
+	def log_cube_make(self):
+		self.log_cube=numpy.log(self.cube)
 
 	
 	def moving_av(self, size, log):
