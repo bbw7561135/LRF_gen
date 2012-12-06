@@ -43,7 +43,7 @@ def get_1DPS(cube):
 
 class LRF_cube:
 
-	def __init__(self, res, sigma, gamma, method, outer):
+	def __init__(self, res, sigma, gamma, method, outer=0.):
 		self.res=res
 		self.gamma=gamma
 		self.method=method
