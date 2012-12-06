@@ -58,6 +58,8 @@ class LRF_cube:
 		elif method=="SRA":
 			self.cube=SRA_gen.cube_make_SRA(self.res, sigma, (self.beta-3)/2. )
 
+		self.log_cube=None
+
 	def normalise(self):
 
 		m=numpy.mean(self.cube[:self.halfsize,:,:])
@@ -78,7 +80,8 @@ class LRF_cube:
 		fileobj.close()
 
 	def log_cube_make(self):
-		self.log_cube=numpy.log(self.cube)
+		if self.log_cube==None:
+			self.log_cube=numpy.log(self.cube)
 
 	
 	def moving_av(self, size, log):
@@ -87,9 +90,10 @@ class LRF_cube:
 		
 		if log==False:
 			cubeA=numpy.append(self.cube, self.cube[:size,:,:], axis=0)	# wrapping round edges of array
-		else: 
-			cube1=numpy.log(self.cube)
-			cubeA=numpy.append(cube1, cube1[:size,:,:], axis=0)	# wrapping round edges of array	
+		else:
+			if self.log_cube==None:
+				self.log_cube_make() 
+			cubeA=numpy.append(self.log_cube, self.log_cube[:size,:,:], axis=0)	# wrapping round edges of array	
 
 		cubeB=numpy.append(cubeA, cubeA[:,:size,:], axis=1)
 		cube2=numpy.append(cubeB, cubeB[:,:,:size], axis=2)
