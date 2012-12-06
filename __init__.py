@@ -43,10 +43,11 @@ def get_1DPS(cube):
 
 class LRF_cube:
 
-	def __init__(self, res, sigma, gamma, method):
+	def __init__(self, res, sigma, gamma, method, outer):
 		self.res=res
 		self.gamma=gamma
 		self.method=method
+		self.outer_scale=outer
 
 		self.beta=0.75*gamma +1
 		self.cube_size=2**res
@@ -54,7 +55,7 @@ class LRF_cube:
 		self.cube_shape=(self.cube_size,self.cube_size,self.cube_size)
 
 		if method=="FFT":
-			self.cube=FFT_gen.cube_make_FFT(self.half_cube_size, self.beta)
+			self.cube=FFT_gen.cube_make_FFT(self.half_cube_size, self.beta, self.outer_scale)
 
 		elif method=="SRA":
 			self.cube=SRA_gen.cube_make_SRA(self.res, sigma, (self.beta-3)/2. )
