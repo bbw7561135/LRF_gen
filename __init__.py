@@ -46,6 +46,7 @@ class LRF_cube:
 	def __init__(self, res, sigma, gamma, method):
 		self.res=res
 		self.gamma=gamma
+		self.method=method
 
 		self.beta=0.75*gamma +1
 		self.cube_size=2**res
@@ -86,20 +87,22 @@ class LRF_cube:
 	
 	def moving_av(self, size, log):
 
-		self.means_array=numpy.zeros(self.cube_shape)
+		if self.method=="FFT":			# As periodic can wrap around
+
+			self.means_array=numpy.zeros(self.cube_shape)
 		
-		if log==False:
-			cubeA=numpy.append(self.cube, self.cube[:size,:,:], axis=0)	# wrapping round edges of array
-		else:
-			if self.log_cube==None:
-				self.log_cube_make() 
-			cubeA=numpy.append(self.log_cube, self.log_cube[:size,:,:], axis=0)	# wrapping round edges of array	
+			if log==False:
+				cubeA=numpy.append(self.cube, self.cube[:size,:,:], axis=0)	# wrapping round edges of array
+			else:
+				if self.log_cube==None:
+					self.log_cube_make() 
+				cubeA=numpy.append(self.log_cube, self.log_cube[:size,:,:], axis=0)	# wrapping round edges of array	
 
-		cubeB=numpy.append(cubeA, cubeA[:,:size,:], axis=1)
-		cube2=numpy.append(cubeB, cubeB[:,:,:size], axis=2)
+			cubeB=numpy.append(cubeA, cubeA[:,:size,:], axis=1)
+			cube2=numpy.append(cubeB, cubeB[:,:,:size], axis=2)
 
-		for i in range(self.cube.shape[0]):
-			for j in range(self.cube.shape[1]):
-				for k in range(self.cube.shape[2]):
-					self.means_array[i,j,k]=numpy.mean(cube2[i:i+size,j:j+size,k:k+size])
+			for i in range(self.cube.shape[0]):
+				for j in range(self.cube.shape[1]):
+					for k in range(self.cube.shape[2]):
+						self.means_array[i,j,k]=numpy.mean(cube2[i:i+size,j:j+size,k:k+size])
 
