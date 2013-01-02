@@ -1,11 +1,13 @@
 import numpy
 import numpy.fft
-import numpy.ma
+#import numpy.ma
 import math
 import scipy.stats
-#import SRA_sub
+
 import FFT_gen
 import SRA_gen
+import plots
+
 
 def get_corr(cube):
 	bins=int(pow(cube.shape[0]/2.,2) + pow(cube.shape[1]/2.,2) + pow(cube.shape[2]/2.,2) + 1)
@@ -40,6 +42,22 @@ def get_1DPS(cube):
 				covs[dist].append(c[i,j,k])
 	return covs
 
+def get_colPS(cube):
+	bins=int(pow(cube.shape[0]/2.,2) + pow(cube.shape[1]/2.,2) + 1)
+	covs=[[] for x in xrange(bins)]
+
+	cube2=numpy.sum(cube, axis=2)
+
+	ff_c=numpy.fft.rfftn(cube2)
+	ff_c=ff_c*numpy.conj(ff_c)
+
+	c=numpy.abs(numpy.fft.fftshift(ff_c, axes=[0]))
+	for i in range(c.shape[0]):
+		for j in range(c.shape[1]):
+			dist=pow(i-c.shape[0]/2,2)+pow(j,2)
+			covs[dist].append(c[i,j])
+	return covs
+
 
 class LRF_cube:
 
@@ -49,14 +67,15 @@ class LRF_cube:
 		self.method=method
 		self.outer_scale=outer
 
-		self.beta=0.75*gamma +1
+		self.beta=gamma
 		self.cube_size=2**res
 		self.half_cube_size=2**(res-1)
 		self.cube_shape=(self.cube_size,self.cube_size,self.cube_size)
 
 		if method=="FFT":
-			self.cube=FFT_gen.cube_make_FFT(self.half_cube_size, self.beta, self.outer_scale)
-
+			self.cube=FFT_gen.cube_make_FFT(self.half_cube_size, self.beta, self.outer_scale, sigma)
+		if method=="FFT2":
+			self.cube=FFT_gen.cube_make_FFT2(self.half_cube_size, self.beta, self.outer_scale, sigma)
 		elif method=="SRA":
 			self.cube=SRA_gen.cube_make_SRA(self.res, sigma, (self.beta-3)/2. )
 
