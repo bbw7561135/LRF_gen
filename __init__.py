@@ -58,6 +58,23 @@ def get_colPS(cube):
 			covs[dist].append(c[i,j])
 	return covs
 
+def get_colcorr(cube):
+	bins=int(pow(cube.shape[0]/2.,2) + pow(cube.shape[1]/2.,2) + 1)
+	covs=[[] for x in xrange(bins)]
+
+	cube2=numpy.sum(cube, axis=2)
+
+	ff_c=numpy.fft.rfftn(cube2)
+	ff_c=ff_c*numpy.conj(ff_c)
+	c=numpy.fft.irfftn(ff_c)/(cube2.shape[0]*(cube2.shape[1]+2))
+	c=numpy.fft.fftshift(c)
+
+	for i in range(c.shape[0]):
+		for j in range(c.shape[1]):
+			dist=pow(i-c.shape[0]/2,2)+pow(j-c.shape[0]/2,2)
+			covs[dist].append(c[i,j])
+	return covs
+
 
 class LRF_cube:
 
