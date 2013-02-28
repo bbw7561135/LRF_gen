@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 
-def cube_make_FFT(cube_half_length, beta, outer_scale, sigma):
+def cube_make_FFT(cube_half_length, beta, outer_scale, sigma, m_func=None, s_func=None):
 	half_cube_shape=cube_half_length*2,cube_half_length*2,cube_half_length+1
 	cube_shape=cube_half_length*2,cube_half_length*2,cube_half_length*2
 	double_cube_shape=cube_half_length*4,cube_half_length*4,cube_half_length*4
@@ -52,12 +52,22 @@ def cube_make_FFT(cube_half_length, beta, outer_scale, sigma):
 
 	#max1=numpy.max(fft_cube[:cube_half_length/2])
 	mean=0#m1*0.38147#numpy.mean(fft_cube)
-	std=5.25E-6*var1#numpy.std(fft_cube)
+	std=1.25E-6*var1#numpy.std(fft_cube)
 
+	if m_func:
+		m=numpy.fromfunction(m_func , cube_shape) #0
+	else:
+		m=0
+
+	if s_func:
+		s=numpy.fromfunction(s_func, cube_shape) #1
+		s*=sigma/numpy.mean(s)
+	else:
+		s=sigma
 
 	#print mean, numpy.mean(fft_cube), std, numpy.std(fft_cube)
 
-	cube=numpy.exp((fft_cube-mean)*sigma/(std))
+	cube=numpy.exp( m + ((fft_cube-mean)/(std))*s  )
 
 	#f_cube=(numpy.fft.rfftn(cube))
 	#return numpy.fft.ifftshift(numpy.abs(f_cube*numpy.conj(f_cube)), axes=(0,1))
