@@ -52,7 +52,7 @@ def cube_make_FFT(cube_half_length, beta, outer_scale, sigma, m_func=None, s_fun
 
 	#max1=numpy.max(fft_cube[:cube_half_length/2])
 	mean=0#m1*0.38147#numpy.mean(fft_cube)
-	std=1.25E-6*var1#numpy.std(fft_cube)
+	std=var1/pow(2*cube_half_length,3)*1.377
 
 	if m_func:
 		m=numpy.fromfunction(m_func , cube_shape) #0
@@ -64,6 +64,8 @@ def cube_make_FFT(cube_half_length, beta, outer_scale, sigma, m_func=None, s_fun
 		s*=sigma/numpy.mean(s)
 	else:
 		s=sigma
+
+	print numpy.std(((fft_cube-mean)/(std))*s )
 
 	#print mean, numpy.mean(fft_cube), std, numpy.std(fft_cube)
 
