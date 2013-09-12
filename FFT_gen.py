@@ -35,7 +35,7 @@ def cube_make_FFT(cube_half_length, beta, outer_scale, sigma, m_func=None, s_fun
 	k_cube=trans2*k_cube-(trans2-1)*pow(scipy.stats.norm.rvs(scale=1E-5, size=half_cube_shape),2)
 
 	k_cube=numpy.fft.ifftshift(k_cube, axes=(0,1))
-	var1= math.sqrt(numpy.sum(k_cube))
+	var1= math.sqrt(numpy.sum(numpy.abs(k_cube)))
 
 
 	k_cube=numpy.sqrt(numpy.abs(k_cube))
@@ -52,7 +52,7 @@ def cube_make_FFT(cube_half_length, beta, outer_scale, sigma, m_func=None, s_fun
 
 	#max1=numpy.max(fft_cube[:cube_half_length/2])
 	mean=0#m1*0.38147#numpy.mean(fft_cube)
-	std=var1/pow(2*cube_half_length,3)*1.377
+	std=var1/pow(2*cube_half_length,3)#*1.377
 
 	if m_func:
 		m=numpy.fromfunction(m_func , cube_shape) #0
@@ -65,7 +65,7 @@ def cube_make_FFT(cube_half_length, beta, outer_scale, sigma, m_func=None, s_fun
 	else:
 		s=sigma
 
-	print numpy.std(((fft_cube-mean)/(std))*s )
+	#print numpy.std(((fft_cube-mean)/(std))*s )
 
 	#print mean, numpy.mean(fft_cube), std, numpy.std(fft_cube)
 
