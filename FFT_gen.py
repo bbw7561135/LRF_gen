@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 
-def cube_make_FFT(cube_half_length, beta, outer_scale, sigma, m_func=None, s_func=None):
+def cube_make_FFT(cube_half_length, beta, outer_scale, sigma, m_func=None, s_func=None, scale_ratio=None):
 	half_cube_shape=cube_half_length*2,cube_half_length*2,cube_half_length+1
 	cube_shape=cube_half_length*2,cube_half_length*2,cube_half_length*2
 	double_cube_shape=cube_half_length*4,cube_half_length*4,cube_half_length*4
@@ -23,16 +23,21 @@ def cube_make_FFT(cube_half_length, beta, outer_scale, sigma, m_func=None, s_fun
 
 	index=-beta	# gives-10/3 for logN power spec
 
+	if scale_ratio:
+		k_cube=numpy.fromfunction(lambda i,j,k: pow(pow((i-cube_half_length)*scale_ratio,2)+pow(j-cube_half_length,2)+pow(k,2),index/2.),half_cube_shape)	
+		dist=numpy.fromfunction(lambda i,j,k: numpy.sqrt(pow((i-cube_half_length)*scale_ratio,2)+pow(j-cube_half_length,2)+pow(k,2)),half_cube_shape)
+#		mean_conver=numpy.fromfunction(lambda i,j,k: pow(numpy.sinc((i-cube_half_length) /(2*cube_half_length/outer_scale*scale_ratio) ), 2) ,half_cube_shape)
 
-	k_cube=numpy.fromfunction(lambda i,j,k: pow(pow(i-cube_half_length,2)+pow(j-cube_half_length,2)+pow(k,2),index/2.),half_cube_shape)
-	dist=numpy.fromfunction(lambda i,j,k: numpy.sqrt(pow(i-cube_half_length,2)+pow(j-cube_half_length,2)+pow(k,2)),half_cube_shape)
-#	trans=numpy.ma.masked_greater(dist, 16.)
-#	trans=numpy.ma.filled(trans-trans+1,fill_value=0.)
-#	k_cube=trans*k_cube
+	else:
+		k_cube=numpy.fromfunction(lambda i,j,k: pow(pow(i-cube_half_length,2)+pow(j-cube_half_length,2)+pow(k,2),index/2.),half_cube_shape)
+		dist=numpy.fromfunction(lambda i,j,k: numpy.sqrt(pow(i-cube_half_length,2)+pow(j-cube_half_length,2)+pow(k,2)),half_cube_shape)
+#		mean_conver=numpy.fromfunction(lambda i,j,k: pow(numpy.sinc((i-cube_half_length) /(2*cube_half_length/outer_scale) ), 2) ,half_cube_shape)
+
 	k_cube=numpy.ma.filled(numpy.ma.masked_invalid(k_cube), fill_value=0)
 	trans2=numpy.ma.masked_less(dist,outer_scale)
 	trans2=numpy.ma.filled(trans2-trans2+1,fill_value=0)
 	k_cube=trans2*k_cube-(trans2-1)*pow(scipy.stats.norm.rvs(scale=1E-5, size=half_cube_shape),2)
+#	k_cube*=mean_conver
 
 	k_cube=numpy.fft.ifftshift(k_cube, axes=(0,1))
 	var1= math.sqrt(numpy.sum(numpy.abs(k_cube)))
