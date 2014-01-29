@@ -62,6 +62,7 @@ def cube_make_FFT(cube_half_length, beta, outer_scale, sigma, m_func=None, s_fun
 	if m_func:
 		m=numpy.fromfunction(m_func , cube_shape) #0
 	else:
+#		m=numpy.fromfunction(lambda i,j,k: -5*numpy.floor(i/96), cube_shape)
 		m=0
 
 	if s_func:
