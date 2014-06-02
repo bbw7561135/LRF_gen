@@ -10,8 +10,9 @@ import mpmath
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
-def rect_make_FFT(rect_half_length, beta, outer_scale, sigma, m_func=None, s_func=None, scale_ratio=None):
-	x_half_length=8
+def rect_make_FFT(rect_half_length, beta, outer_scale, sigma, m_func=None, s_func=None, scale_ratio=None, x_half_length=None):
+	if x_half_length is None:
+	   x_half_length=rect_half_length
 	half_rect_shape=rect_half_length*2,x_half_length+1
 	rect_shape=rect_half_length*2,x_half_length*2
 	double_rect_shape=rect_half_length*4,x_half_length*4
