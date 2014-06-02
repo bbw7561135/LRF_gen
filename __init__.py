@@ -7,6 +7,7 @@ import scipy.stats
 import FFT_gen
 import SRA_gen
 import plots
+import FFT_rect
 
 
 def get_corr(cube):
@@ -95,6 +96,9 @@ class LRF_cube:
 			self.cube=FFT_gen.cube_make_FFT2(self.half_cube_size, self.beta, self.outer_scale, sigma)
 		elif method=="SRA":
 			self.cube=SRA_gen.cube_make_SRA(self.res, sigma, (self.beta-3)/2. )
+		if method=="FFT2D":
+			self.cube=FFT_rect.rect_make_FFT(self.half_cube_size, self.beta, self.outer_scale, sigma, m_func, s_func, scale_ratio)
+		self.method=method
 
 		self.log_cube=None
 
@@ -109,11 +113,18 @@ class LRF_cube:
 
 		fileobj=open(filename, "w")
 
-		for i in range(self.cube.shape[0]):
-			for j in range(self.cube.shape[1]):
-				for k in range(self.cube.shape[2]):
+		if self.method=="FFT2D":
 
-					fileobj.write("%i\t%i\t%i\t%.3f\n" %(i,j,k,self.cube[i,j,k]))
+			for i in range(self.cube.shape[0]):
+				for k in range(self.cube.shape[1]):
+					fileobj.write("%i\t%i\t%.3f\n" %(i,k,self.cube[i,k]))
+		else:
+
+			for i in range(self.cube.shape[0]):
+				for j in range(self.cube.shape[1]):
+					for k in range(self.cube.shape[2]):
+
+						fileobj.write("%i\t%i\t%i\t%.3f\n" %(i,j,k,self.cube[i,j,k]))
 
 		fileobj.close()
 
