@@ -1,0 +1,16 @@
+LRF_gen - A library for creating lognormal random fields
+============================================================
+
+Author - Stuart Sale
+
+Intro
+------------
+
+This is a python library that contains function to enable the creation of Gaussian random fields and so lognormal random fields. It also provides some simple functions for manipulating the fields produced.
+
+
+Comments
+------------
+More documentation to follow in due course.
+
+
