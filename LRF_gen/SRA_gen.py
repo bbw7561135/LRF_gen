@@ -2,209 +2,212 @@ import numpy
 import numpy.fft
 import math
 import scipy.stats
+import warnings
 
 
 def cube_make_SRA(res, sigma, H):
 
-	N=2**res
-	X=numpy.zeros([N+1, N+1, N+1])
+    warnings.warn("deprecated", DeprecationWarning)
 
-	size=N
-	halfsize=N/2
+    N=2**res
+    X=numpy.zeros([N+1, N+1, N+1])
 
-	delta=sigma
+    size=N
+    halfsize=N/2
 
-	X[0:N+1:N,0:N+1:N,0:N+1:N]=scipy.stats.norm.rvs(scale=delta, size=[2,2,2]) 
+    delta=sigma
 
-#	print X
-	#NO=1
-	N1=N
-	N2=N1/2
+    X[0:N+1:N,0:N+1:N,0:N+1:N]=scipy.stats.norm.rvs(scale=delta, size=[2,2,2]) 
 
-  	delta1=delta*pow(3./4.,H)*math.sqrt(1-0.25*pow(4./3.,H)) / pow(2,-H)
-	delta2=delta*pow(2.,-2*H)*math.sqrt(1-0.25*(3./2.)**H) / pow(2,-H)
-    	delta3=delta*pow(2.,-H) * math.sqrt(1-0.25*pow(2.,H)) / pow(2,-H)
+#    print X
+    #NO=1
+    N1=N
+    N2=N1/2
 
-	for stage in range(1, res+1):
-		#for NNN in range(1, NO+1):
+    delta1=delta*pow(3./4.,H)*math.sqrt(1-0.25*pow(4./3.,H)) / pow(2,-H)
+    delta2=delta*pow(2.,-2*H)*math.sqrt(1-0.25*(3./2.)**H) / pow(2,-H)
+    delta3=delta*pow(2.,-H) * math.sqrt(1-0.25*pow(2.,H)) / pow(2,-H)
 
-		delta1*=pow(2.,-H)
-		delta2*=pow(2.,-H)
-		delta3*=pow(2.,-H)
+    for stage in range(1, res+1):
+        #for NNN in range(1, NO+1):
 
-	# Type 1 analogue (Saupe) cube - Jilesen a
-	# cube centre points
+        delta1*=pow(2.,-H)
+        delta2*=pow(2.,-H)
+        delta3*=pow(2.,-H)
 
-		X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1] += ( X[2*N2::N1, 2*N2::N1, 2*N2::N1] + X[2*N2::N1, 2*N2::N1, :-2*N2:N1] +
-							X[2*N2::N1, :-2*N2:N1, 2*N2::N1] + X[2*N2::N1, :-2*N2:N1, :-2*N2:N1] +
-							X[:-2*N2:N1, 2*N2::N1, 2*N2::N1] + X[:-2*N2:N1, 2*N2::N1, :-2*N2:N1] + 
-							X[:-2*N2:N1, :-2*N2:N1, 2*N2::N1] + X[:-2*N2:N1, :-2*N2:N1, :-2*N2:N1] 
-							)/8. +scipy.stats.norm.rvs(scale=delta1, size=X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1].shape)
-		
-		# Random addition
-		X[0::N1, 0::N1, 0::N1] += scipy.stats.norm.rvs(scale=delta1, size=X[0::N1, 0::N1, 0::N1].shape)
+    # Type 1 analogue (Saupe) cube - Jilesen a
+    # cube centre points
 
-	# Type 2a analogue - square bipyramid - Jilesen b
-	# face mid points
+        X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1] += ( X[2*N2::N1, 2*N2::N1, 2*N2::N1] + X[2*N2::N1, 2*N2::N1, :-2*N2:N1] +
+                            X[2*N2::N1, :-2*N2:N1, 2*N2::N1] + X[2*N2::N1, :-2*N2:N1, :-2*N2:N1] +
+                            X[:-2*N2:N1, 2*N2::N1, 2*N2::N1] + X[:-2*N2:N1, 2*N2::N1, :-2*N2:N1] + 
+                            X[:-2*N2:N1, :-2*N2:N1, 2*N2::N1] + X[:-2*N2:N1, :-2*N2:N1, :-2*N2:N1] 
+                            )/8. +scipy.stats.norm.rvs(scale=delta1, size=X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1].shape)
+        
+        # Random addition
+        X[0::N1, 0::N1, 0::N1] += scipy.stats.norm.rvs(scale=delta1, size=X[0::N1, 0::N1, 0::N1].shape)
 
-		# outer-side points
-		X[N2:-N2:N1, N2:-N2:N1, 0] = ( X[2*N2::N1, 2*N2::N1, 0] + X[2*N2::N1, :-2*N2:N1, 0] + X[:-2*N2:N1, 2*N2::N1, 0] 
-						+ X[:-2*N2:N1, :-2*N2:N1, 0] + X[N2:-N2:N1, N2:-N2:N1, N2] 
-						)/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
-		X[N2:-N2:N1, N2:-N2:N1,-1] = ( X[2*N2::N1, 2*N2::N1,-1] + X[2*N2::N1, :-2*N2:N1,-1] + X[:-2*N2:N1, 2*N2::N1,-1] 
-						+ X[:-2*N2:N1, :-2*N2:N1,-1] + X[N2:-N2:N1, N2:-N2:N1,-N2-1] 
-						)/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
-		X[N2:-N2:N1, 0, N2:-N2:N1] = ( X[2*N2::N1, 0, 2*N2::N1] + X[2*N2::N1, 0, :-2*N2:N1] + X[:-2*N2:N1, 0, 2*N2::N1] 
-						+ X[:-2*N2:N1, 0, :-2*N2:N1] + X[N2:-N2:N1, N2, N2:-N2:N1] 
-						)/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
-		X[N2:-N2:N1,-1, N2:-N2:N1] = ( X[2*N2::N1,-1, 2*N2::N1] + X[2*N2::N1,-1, :-2*N2:N1] + X[:-2*N2:N1,-1, 2*N2::N1] 
-						+ X[:-2*N2:N1,-1, :-2*N2:N1] + X[N2:-N2:N1,-N2-1, N2:-N2:N1] 
-						)/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
-		X[0, N2:-N2:N1, N2:-N2:N1] = ( X[0, 2*N2::N1, 2*N2::N1] + X[0, 2*N2::N1, :-2*N2:N1] + X[0, :-2*N2:N1, 2*N2::N1] 
-						+ X[0, :-2*N2:N1, :-2*N2:N1] + X[N2, N2:-N2:N1, N2:-N2:N1] 
-						)/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
-		X[-1,N2:-N2:N1, N2:-N2:N1] = ( X[-1,2*N2::N1, 2*N2::N1] + X[-1,2*N2::N1, :-2*N2:N1] + X[-1,:-2*N2:N1, 2*N2::N1] 
-						+ X[-1,:-2*N2:N1, :-2*N2:N1] + X[N2:-N2:N1, N2:-N2:N1,-N2-1] 
-						)/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
+    # Type 2a analogue - square bipyramid - Jilesen b
+    # face mid points
 
-
-		# other points 
-		if stage!=1:
-			X[N2:-N2:N1, N2:-N2:N1, N1:-N2:N1] = ( 	X[2*N2::N1, 2*N2::N1, N1:-N2:N1] + X[2*N2::N1, :-2*N2:N1, N1:-N2:N1] +
-								X[:-2*N2:N1, 2*N2::N1, N1:-N2:N1] + X[:-2*N2:N1, :-2*N2:N1, N1:-N2:N1] + 
-								X[N2:-N2:N1, N2:-N2:N1, N1+N2::N1] + X[N2:-N2:N1, N2:-N2:N1, N1-N2:-2*N2:N1]
-								)/6. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, N1:-N2:N1].shape)
-
-			X[N2:-N2:N1, N1:-N2:N1, N2:-N2:N1] = ( 	X[2*N2::N1, N1:-N2:N1, 2*N2::N1] + X[2*N2::N1, N1:-N2:N1, :-2*N2:N1] +
-								X[:-2*N2:N1, N1:-N2:N1, 2*N2::N1] + X[:-2*N2:N1, N1:-N2:N1, :-2*N2:N1] + 
-								X[N2:-N2:N1, N1+N2::N1, N2:-N2:N1] + X[N2:-N2:N1, N1-N2:-2*N2:N1, N2:-N2:N1]
-								)/6. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N1:-N2:N1, N2:-N2:N1].shape)
-
-			X[N1:-N2:N1, N2:-N2:N1, N2:-N2:N1] = ( 	X[N1:-N2:N1, 2*N2::N1, 2*N2::N1] + X[N1:-N2:N1, 2*N2::N1, :-2*N2:N1] +
-								X[N1:-N2:N1, :-2*N2:N1, 2*N2::N1] + X[N1:-N2:N1, :-2*N2:N1, :-2*N2:N1] + 
-								X[N1+N2::N1, N2:-N2:N1, N2:-N2:N1] + X[N1-N2:-2*N2:N1, N2:-N2:N1, N2:-N2:N1]
-								)/6. + scipy.stats.norm.rvs(scale=delta2, size=X[N1:-N2:N1, N2:-N2:N1, N2:-N2:N1].shape)
-
-		# Random addition
-		X[0::N1, 0::N1, 0::N1] += scipy.stats.norm.rvs(scale=delta2, size=X[0::N1, 0::N1, 0::N1].shape)
-		X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1].shape)		
+        # outer-side points
+        X[N2:-N2:N1, N2:-N2:N1, 0] = ( X[2*N2::N1, 2*N2::N1, 0] + X[2*N2::N1, :-2*N2:N1, 0] + X[:-2*N2:N1, 2*N2::N1, 0] 
+                        + X[:-2*N2:N1, :-2*N2:N1, 0] + X[N2:-N2:N1, N2:-N2:N1, N2] 
+                        )/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
+        X[N2:-N2:N1, N2:-N2:N1,-1] = ( X[2*N2::N1, 2*N2::N1,-1] + X[2*N2::N1, :-2*N2:N1,-1] + X[:-2*N2:N1, 2*N2::N1,-1] 
+                        + X[:-2*N2:N1, :-2*N2:N1,-1] + X[N2:-N2:N1, N2:-N2:N1,-N2-1] 
+                        )/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
+        X[N2:-N2:N1, 0, N2:-N2:N1] = ( X[2*N2::N1, 0, 2*N2::N1] + X[2*N2::N1, 0, :-2*N2:N1] + X[:-2*N2:N1, 0, 2*N2::N1] 
+                        + X[:-2*N2:N1, 0, :-2*N2:N1] + X[N2:-N2:N1, N2, N2:-N2:N1] 
+                        )/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
+        X[N2:-N2:N1,-1, N2:-N2:N1] = ( X[2*N2::N1,-1, 2*N2::N1] + X[2*N2::N1,-1, :-2*N2:N1] + X[:-2*N2:N1,-1, 2*N2::N1] 
+                        + X[:-2*N2:N1,-1, :-2*N2:N1] + X[N2:-N2:N1,-N2-1, N2:-N2:N1] 
+                        )/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
+        X[0, N2:-N2:N1, N2:-N2:N1] = ( X[0, 2*N2::N1, 2*N2::N1] + X[0, 2*N2::N1, :-2*N2:N1] + X[0, :-2*N2:N1, 2*N2::N1] 
+                        + X[0, :-2*N2:N1, :-2*N2:N1] + X[N2, N2:-N2:N1, N2:-N2:N1] 
+                        )/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
+        X[-1,N2:-N2:N1, N2:-N2:N1] = ( X[-1,2*N2::N1, 2*N2::N1] + X[-1,2*N2::N1, :-2*N2:N1] + X[-1,:-2*N2:N1, 2*N2::N1] 
+                        + X[-1,:-2*N2:N1, :-2*N2:N1] + X[N2:-N2:N1, N2:-N2:N1,-N2-1] 
+                        )/5. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
 
 
+        # other points 
+        if stage!=1:
+            X[N2:-N2:N1, N2:-N2:N1, N1:-N2:N1] = (     X[2*N2::N1, 2*N2::N1, N1:-N2:N1] + X[2*N2::N1, :-2*N2:N1, N1:-N2:N1] +
+                                X[:-2*N2:N1, 2*N2::N1, N1:-N2:N1] + X[:-2*N2:N1, :-2*N2:N1, N1:-N2:N1] + 
+                                X[N2:-N2:N1, N2:-N2:N1, N1+N2::N1] + X[N2:-N2:N1, N2:-N2:N1, N1-N2:-2*N2:N1]
+                                )/6. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, N1:-N2:N1].shape)
 
-	# Type 2b analogue - octohedron - Jilesen c
-	# edge middle points
-	#
-	# Maybe an error here in Lu et al.'s technique that I have attempted to correct
+            X[N2:-N2:N1, N1:-N2:N1, N2:-N2:N1] = (     X[2*N2::N1, N1:-N2:N1, 2*N2::N1] + X[2*N2::N1, N1:-N2:N1, :-2*N2:N1] +
+                                X[:-2*N2:N1, N1:-N2:N1, 2*N2::N1] + X[:-2*N2:N1, N1:-N2:N1, :-2*N2:N1] + 
+                                X[N2:-N2:N1, N1+N2::N1, N2:-N2:N1] + X[N2:-N2:N1, N1-N2:-2*N2:N1, N2:-N2:N1]
+                                )/6. + scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N1:-N2:N1, N2:-N2:N1].shape)
 
-		# outer edges x12!
+            X[N1:-N2:N1, N2:-N2:N1, N2:-N2:N1] = (     X[N1:-N2:N1, 2*N2::N1, 2*N2::N1] + X[N1:-N2:N1, 2*N2::N1, :-2*N2:N1] +
+                                X[N1:-N2:N1, :-2*N2:N1, 2*N2::N1] + X[N1:-N2:N1, :-2*N2:N1, :-2*N2:N1] + 
+                                X[N1+N2::N1, N2:-N2:N1, N2:-N2:N1] + X[N1-N2:-2*N2:N1, N2:-N2:N1, N2:-N2:N1]
+                                )/6. + scipy.stats.norm.rvs(scale=delta2, size=X[N1:-N2:N1, N2:-N2:N1, N2:-N2:N1].shape)
 
-		X[N2:-N2:N1, 0, 0] = ( X[2*N2::N1, 0, 0] + X[:-2*N2:N1, 0, 0] + X[N2:-N2:N1, 0, N2] + X[N2:-N2:N1, N2, 0] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, 0].shape)
-		X[N2:-N2:N1, 0,-1] = ( X[2*N2::N1, 0,-1] + X[:-2*N2:N1, 0,-1] + X[N2:-N2:N1, 0, -N2-1] + X[N2:-N2:N1, N2,-1] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, 0].shape)
-		X[N2:-N2:N1,-1, 0] = ( X[2*N2::N1,-1, 0] + X[:-2*N2:N1,-1, 0] + X[N2:-N2:N1,-1, N2] + X[N2:-N2:N1, -N2-1, 0] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, 0].shape)
-		X[N2:-N2:N1,-1,-1] = ( X[2*N2::N1,-1,-1] + X[:-2*N2:N1,-1,-1] + X[N2:-N2:N1,-1, -N2-1] + X[N2:-N2:N1, -N2-1,-1] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, 0].shape)
-
-		X[0, N2:-N2:N1, 0] = ( X[0, 2*N2::N1, 0] + X[0, :-2*N2:N1, 0] + X[0, N2:-N2:N1, N2] + X[N2, N2:-N2:N1, 0] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, 0].shape)
-		X[0, N2:-N2:N1,-1] = ( X[0, 2*N2::N1,-1] + X[0, :-2*N2:N1,-1] + X[0, N2:-N2:N1, -N2-1] + X[N2, N2:-N2:N1,-1] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, 0].shape)
-		X[-1, N2:-N2:N1, 0] = ( X[-1, 2*N2::N1, 0] + X[-1, :-2*N2:N1, 0] + X[-1, N2:-N2:N1, N2] + X[-N2-1, N2:-N2:N1, 0] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, 0].shape)
-		X[-1, N2:-N2:N1,-1] = ( X[-1, 2*N2::N1,-1] + X[-1, :-2*N2:N1,-1] + X[-1, N2:-N2:N1, -N2-1] + X[-N2-1, N2:-N2:N1,-1] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, 0].shape)
-
-		X[0, 0, N2:-N2:N1] = ( X[0, 0, 2*N2::N1] + X[0, 0, :-2*N2:N1] + X[0, N2, N2:-N2:N1] + X[N2, 0, N2:-N2:N1] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, 0, N2:-N2:N1].shape)
-		X[0,-1, N2:-N2:N1] = ( X[0,-1, 2*N2::N1] + X[0,-1, :-2*N2:N1] + X[0, -N2-1, N2:-N2:N1] + X[N2,-1, N2:-N2:N1] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, 0, N2:-N2:N1].shape)
-		X[-1, 0, N2:-N2:N1] = ( X[-1, 0, 2*N2::N1] + X[-1, 0, :-2*N2:N1] + X[-1, N2, N2:-N2:N1] + X[-N2-1, 0, N2:-N2:N1] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, 0, N2:-N2:N1].shape)
-		X[-1,-1, N2:-N2:N1] = ( X[-1,-1, 2*N2::N1] + X[-1,-1, :-2*N2:N1] + X[-1, -N2-1, N2:-N2:N1] + X[-N2-1,-1, N2:-N2:N1] 
-					)/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, 0, N2:-N2:N1].shape)
-
-		# other points  
-
-		if stage>1:
-			X[N2:-N2:N1, N1:-N2:N1, 0] = (X[N2:-N2:N1, N1:-N2:N1, N2] + X[N2:-N2:N1, N1+N2::N1, 0] + X[N2:-N2:N1, N1-N2:-2*N2:N1, 0] +
-							 X[2*N2::N1, N1:-N2:N1, 0] + X[:-2*N2:N1, N1:-N2:N1, 0] 
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N1:-N2:N1, 0].shape)
-			X[N2:-N2:N1, N1:-N2:N1,-1] = (X[N2:-N2:N1, N1:-N2:N1,-N2-1] + X[N2:-N2:N1, N1+N2::N1,-1] + X[N2:-N2:N1, N1-N2:-2*N2:N1,-1] +
-							 X[2*N2::N1, N1:-N2:N1, -1] + X[:-2*N2:N1, N1:-N2:N1, -1]  
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N1:-N2:N1, 0].shape) 
-			X[N1:-N2:N1, N2:-N2:N1, 0] = (X[N1:-N2:N1, N2:-N2:N1, N2] + X[N1:-N2:N1, 2*N2::N1, 0] + X[N1:-N2:N1, :-2*N2:N1, 0] +
-							 X[N1+N2::N1, N2:-N2:N1, 0] + X[N1-N2:-2*N2:N1, N2:-N2:N1, 0]  
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N2:N1, N2:-N2:N1, 0].shape)
-			X[N1:-N2:N1, N2:-N2:N1,-1] = (X[N1:-N2:N1, N2:-N2:N1, -N2-1] + X[N1:-N2:N1, 2*N2::N1,-1] + X[N1:-N2:N1, :-2*N2:N1,-1] +
-							 X[N1+N2::N1, N2:-N2:N1, -1] + X[N1-N2:-2*N2:N1, N2:-N2:N1, -1]  
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N2:N1, N2:-N2:N1, 0].shape)
+        # Random addition
+        X[0::N1, 0::N1, 0::N1] += scipy.stats.norm.rvs(scale=delta2, size=X[0::N1, 0::N1, 0::N1].shape)
+        X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta2, size=X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1].shape)        
 
 
 
-			X[N2:-N2:N1, 0, N1:-N2:N1] = (X[N2:-N2:N1, N2, N1:-N2:N1] + X[N2:-N2:N1, 0, N1+N2::N1] + X[N2:-N2:N1, 0, N1-N2:-2*N2:N1] +
-							 X[2*N2::N1, 0, N1:-N2:N1] + X[:-2*N2:N1, 0, N1:-N2:N1]  
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, N1:-N2:N1].shape) 
-			X[N2:-N2:N1,-1, N1:-N2:N1] = (X[N2:-N2:N1,-N2-1, N1:-N2:N1] + X[N2:-N2:N1,-1, N1+N2::N1] + X[N2:-N2:N1,-1, N1-N2:-2*N2:N1] +
-							 X[2*N2::N1, -1, N1:-N2:N1] + X[:-2*N2:N1, -1, N1:-N2:N1]  
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1,-1, N1:-N2:N1].shape)
-			X[N1:-N2:N1, 0, N2:-N2:N1] = (X[N1:-N2:N1, N2, N2:-N2:N1] + X[N1:-N2:N1, 0, 2*N2::N1] + X[N1:-N2:N1, 0, :-2*N2:N1] +
-							 X[N1+N2::N1, 0, N2:-N2:N1] + X[N1-N2:-2*N2:N1, 0, N2:-N2:N1]  
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N2:N1, 0, N2:-N2:N1].shape) 
-			X[N1:-N2:N1,-1, N2:-N2:N1] = (X[N1:-N2:N1, -N2-1, N2:-N2:N1] + X[N1:-N2:N1, -1, 2*N2::N1] + X[N1:-N2:N1, -1, :-2*N2:N1] +
-							 X[N1+N2::N1, -1, N2:-N2:N1] + X[N1-N2:-2*N2:N1, -1, N2:-N2:N1]  
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N2:N1, 0, N2:-N2:N1].shape) 
+    # Type 2b analogue - octohedron - Jilesen c
+    # edge middle points
+    #
+    # Maybe an error here in Lu et al.'s technique that I have attempted to correct
 
-			X[0, N2:-N2:N1, N1:-N2:N1] = (X[N2, N2:-N2:N1, N1:-N2:N1] + X[0, N2:-N2:N1, N1+N2::N1] + X[0, N2:-N2:N1, N1-N2:-2*N2:N1] +
-							 X[0, 2*N2::N1, N1:-N2:N1] + X[0, :-2*N2:N1, N1:-N2:N1]  
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, N1:-N2:N1].shape) 
-			X[-1, N2:-N2:N1, N1:-N2:N1] = (X[-N2-1, N2:-N2:N1, N1:-N2:N1] + X[-1, N2:-N2:N1, N1+N2::N1] +
-							 X[-1, N2:-N2:N1, N1-N2:-2*N2:N1] + X[-1, 2*N2::N1, N1:-N2:N1] + X[-1, :-2*N2:N1, N1:-N2:N1] 
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, N1:-N2:N1].shape)
-			X[0, N1:-N2:N1, N2:-N2:N1] = (X[N2, N1:-N2:N1, N2:-N2:N1] + X[0, N1:-N2:N1, 2*N2::N1] + X[0, N1:-N2:N1, :-2*N2:N1] +
-							 X[0, N1+N2::N1, N2:-N2:N1] + X[0, N1-N2:-2*N2:N1, N2:-N2:N1]  
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N1:-N2:N1, N2:-N2:N1].shape)
-			X[-1, N1:-N2:N1, N2:-N2:N1] = (X[-N2-1, N1:-N2:N1, N2:-N2:N1] + X[-1, N1:-N2:N1, 2*N2::N1] + X[-1, N1:-N2:N1, :-2*N2:N1] +
-							 X[-1, N1+N2::N1, N2:-N2:N1] + X[-1, N1-N2:-2*N2:N1, N2:-N2:N1]  
-							)/5. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N1:-N2:N1, N2:-N2:N1].shape) 
+        # outer edges x12!
+
+        X[N2:-N2:N1, 0, 0] = ( X[2*N2::N1, 0, 0] + X[:-2*N2:N1, 0, 0] + X[N2:-N2:N1, 0, N2] + X[N2:-N2:N1, N2, 0] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, 0].shape)
+        X[N2:-N2:N1, 0,-1] = ( X[2*N2::N1, 0,-1] + X[:-2*N2:N1, 0,-1] + X[N2:-N2:N1, 0, -N2-1] + X[N2:-N2:N1, N2,-1] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, 0].shape)
+        X[N2:-N2:N1,-1, 0] = ( X[2*N2::N1,-1, 0] + X[:-2*N2:N1,-1, 0] + X[N2:-N2:N1,-1, N2] + X[N2:-N2:N1, -N2-1, 0] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, 0].shape)
+        X[N2:-N2:N1,-1,-1] = ( X[2*N2::N1,-1,-1] + X[:-2*N2:N1,-1,-1] + X[N2:-N2:N1,-1, -N2-1] + X[N2:-N2:N1, -N2-1,-1] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, 0].shape)
+
+        X[0, N2:-N2:N1, 0] = ( X[0, 2*N2::N1, 0] + X[0, :-2*N2:N1, 0] + X[0, N2:-N2:N1, N2] + X[N2, N2:-N2:N1, 0] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, 0].shape)
+        X[0, N2:-N2:N1,-1] = ( X[0, 2*N2::N1,-1] + X[0, :-2*N2:N1,-1] + X[0, N2:-N2:N1, -N2-1] + X[N2, N2:-N2:N1,-1] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, 0].shape)
+        X[-1, N2:-N2:N1, 0] = ( X[-1, 2*N2::N1, 0] + X[-1, :-2*N2:N1, 0] + X[-1, N2:-N2:N1, N2] + X[-N2-1, N2:-N2:N1, 0] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, 0].shape)
+        X[-1, N2:-N2:N1,-1] = ( X[-1, 2*N2::N1,-1] + X[-1, :-2*N2:N1,-1] + X[-1, N2:-N2:N1, -N2-1] + X[-N2-1, N2:-N2:N1,-1] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, 0].shape)
+
+        X[0, 0, N2:-N2:N1] = ( X[0, 0, 2*N2::N1] + X[0, 0, :-2*N2:N1] + X[0, N2, N2:-N2:N1] + X[N2, 0, N2:-N2:N1] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, 0, N2:-N2:N1].shape)
+        X[0,-1, N2:-N2:N1] = ( X[0,-1, 2*N2::N1] + X[0,-1, :-2*N2:N1] + X[0, -N2-1, N2:-N2:N1] + X[N2,-1, N2:-N2:N1] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, 0, N2:-N2:N1].shape)
+        X[-1, 0, N2:-N2:N1] = ( X[-1, 0, 2*N2::N1] + X[-1, 0, :-2*N2:N1] + X[-1, N2, N2:-N2:N1] + X[-N2-1, 0, N2:-N2:N1] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, 0, N2:-N2:N1].shape)
+        X[-1,-1, N2:-N2:N1] = ( X[-1,-1, 2*N2::N1] + X[-1,-1, :-2*N2:N1] + X[-1, -N2-1, N2:-N2:N1] + X[-N2-1,-1, N2:-N2:N1] 
+                    )/4. + scipy.stats.norm.rvs(scale=delta3, size=X[0, 0, N2:-N2:N1].shape)
+
+        # other points  
+
+        if stage>1:
+            X[N2:-N2:N1, N1:-N2:N1, 0] = (X[N2:-N2:N1, N1:-N2:N1, N2] + X[N2:-N2:N1, N1+N2::N1, 0] + X[N2:-N2:N1, N1-N2:-2*N2:N1, 0] +
+                             X[2*N2::N1, N1:-N2:N1, 0] + X[:-2*N2:N1, N1:-N2:N1, 0] 
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N1:-N2:N1, 0].shape)
+            X[N2:-N2:N1, N1:-N2:N1,-1] = (X[N2:-N2:N1, N1:-N2:N1,-N2-1] + X[N2:-N2:N1, N1+N2::N1,-1] + X[N2:-N2:N1, N1-N2:-2*N2:N1,-1] +
+                             X[2*N2::N1, N1:-N2:N1, -1] + X[:-2*N2:N1, N1:-N2:N1, -1]  
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N1:-N2:N1, 0].shape) 
+            X[N1:-N2:N1, N2:-N2:N1, 0] = (X[N1:-N2:N1, N2:-N2:N1, N2] + X[N1:-N2:N1, 2*N2::N1, 0] + X[N1:-N2:N1, :-2*N2:N1, 0] +
+                             X[N1+N2::N1, N2:-N2:N1, 0] + X[N1-N2:-2*N2:N1, N2:-N2:N1, 0]  
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N2:N1, N2:-N2:N1, 0].shape)
+            X[N1:-N2:N1, N2:-N2:N1,-1] = (X[N1:-N2:N1, N2:-N2:N1, -N2-1] + X[N1:-N2:N1, 2*N2::N1,-1] + X[N1:-N2:N1, :-2*N2:N1,-1] +
+                             X[N1+N2::N1, N2:-N2:N1, -1] + X[N1-N2:-2*N2:N1, N2:-N2:N1, -1]  
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N2:N1, N2:-N2:N1, 0].shape)
 
 
-			X[N2:-N2:N1, N1:-N1:N1, N1:-N1:N1] = ( X[N2:-N2:N1, N1:-N1:N1, N1+N2:-N1+N2:N1] + X[N2:-N2:N1, N1:-N1:N1, N1-N2:-N1-N2:N1] +
-								X[N2:-N2:N1, N1+N2:-N1+N2:N1, N1:-N1:N1] + X[N2:-N2:N1, N1-N2:-N1-N2:N1, N1:-N1:N1] + 
-								X[2*N2::N1, N1:-N1:N1, N1:-N1:N1] + X[:-2*N2:N1, N1:-N1:N1, N1:-N1:N1] 
-								)/6. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N1:-N1:N1, N1:-N1:N1].shape)
-			X[N1:-N1:N1, N2:-N2:N1, N1:-N1:N1] = ( X[N1:-N1:N1, N2:-N2:N1, N1+N2:-N1+N2:N1] + X[N1:-N1:N1, N2:-N2:N1, N1-N2:-N1-N2:N1] +
-								X[ N1+N2:-N1+N2:N1, N2:-N2:N1,N1:-N1:N1] + X[ N1-N2:-N1-N2:N1, N2:-N2:N1,N1:-N1:N1] + 
-								X[N1:-N1:N1, 2*N2::N1, N1:-N1:N1] + X[N1:-N1:N1, :-2*N2:N1, N1:-N1:N1]  
-								)/6. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N1:N1, N2:-N2:N1, N1:-N1:N1].shape)
-			X[N1:-N1:N1, N1:-N1:N1, N2:-N2:N1] = ( X[N1:-N1:N1, N1+N2:-N1+N2:N1, N2:-N2:N1] + X[N1:-N1:N1, N1-N2:-N1-N2:N1, N2:-N2:N1] +
-								X[N1+N2:-N1+N2:N1, N1:-N1:N1, N2:-N2:N1] + X[N1-N2:-N1-N2:N1, N1:-N1:N1, N2:-N2:N1] + 
-								X[N1:-N1:N1, N1:-N1:N1, 2*N2::N1] + X[N1:-N1:N1, N1:-N1:N1, :-2*N2:N1]  
-								)/6. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N1:N1, N1:-N1:N1, N2:-N2:N1].shape)
 
-		# random addition
+            X[N2:-N2:N1, 0, N1:-N2:N1] = (X[N2:-N2:N1, N2, N1:-N2:N1] + X[N2:-N2:N1, 0, N1+N2::N1] + X[N2:-N2:N1, 0, N1-N2:-2*N2:N1] +
+                             X[2*N2::N1, 0, N1:-N2:N1] + X[:-2*N2:N1, 0, N1:-N2:N1]  
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, N1:-N2:N1].shape) 
+            X[N2:-N2:N1,-1, N1:-N2:N1] = (X[N2:-N2:N1,-N2-1, N1:-N2:N1] + X[N2:-N2:N1,-1, N1+N2::N1] + X[N2:-N2:N1,-1, N1-N2:-2*N2:N1] +
+                             X[2*N2::N1, -1, N1:-N2:N1] + X[:-2*N2:N1, -1, N1:-N2:N1]  
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1,-1, N1:-N2:N1].shape)
+            X[N1:-N2:N1, 0, N2:-N2:N1] = (X[N1:-N2:N1, N2, N2:-N2:N1] + X[N1:-N2:N1, 0, 2*N2::N1] + X[N1:-N2:N1, 0, :-2*N2:N1] +
+                             X[N1+N2::N1, 0, N2:-N2:N1] + X[N1-N2:-2*N2:N1, 0, N2:-N2:N1]  
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N2:N1, 0, N2:-N2:N1].shape) 
+            X[N1:-N2:N1,-1, N2:-N2:N1] = (X[N1:-N2:N1, -N2-1, N2:-N2:N1] + X[N1:-N2:N1, -1, 2*N2::N1] + X[N1:-N2:N1, -1, :-2*N2:N1] +
+                             X[N1+N2::N1, -1, N2:-N2:N1] + X[N1-N2:-2*N2:N1, -1, N2:-N2:N1]  
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N2:N1, 0, N2:-N2:N1].shape) 
 
-		X[0::N1, 0::N1, 0::N1] += scipy.stats.norm.rvs(scale=delta3, size=X[0::N1, 0::N1, 0::N1].shape)
-		X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1].shape)
+            X[0, N2:-N2:N1, N1:-N2:N1] = (X[N2, N2:-N2:N1, N1:-N2:N1] + X[0, N2:-N2:N1, N1+N2::N1] + X[0, N2:-N2:N1, N1-N2:-2*N2:N1] +
+                             X[0, 2*N2::N1, N1:-N2:N1] + X[0, :-2*N2:N1, N1:-N2:N1]  
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, N1:-N2:N1].shape) 
+            X[-1, N2:-N2:N1, N1:-N2:N1] = (X[-N2-1, N2:-N2:N1, N1:-N2:N1] + X[-1, N2:-N2:N1, N1+N2::N1] +
+                             X[-1, N2:-N2:N1, N1-N2:-2*N2:N1] + X[-1, 2*N2::N1, N1:-N2:N1] + X[-1, :-2*N2:N1, N1:-N2:N1] 
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, N1:-N2:N1].shape)
+            X[0, N1:-N2:N1, N2:-N2:N1] = (X[N2, N1:-N2:N1, N2:-N2:N1] + X[0, N1:-N2:N1, 2*N2::N1] + X[0, N1:-N2:N1, :-2*N2:N1] +
+                             X[0, N1+N2::N1, N2:-N2:N1] + X[0, N1-N2:-2*N2:N1, N2:-N2:N1]  
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N1:-N2:N1, N2:-N2:N1].shape)
+            X[-1, N1:-N2:N1, N2:-N2:N1] = (X[-N2-1, N1:-N2:N1, N2:-N2:N1] + X[-1, N1:-N2:N1, 2*N2::N1] + X[-1, N1:-N2:N1, :-2*N2:N1] +
+                             X[-1, N1+N2::N1, N2:-N2:N1] + X[-1, N1-N2:-2*N2:N1, N2:-N2:N1]  
+                            )/5. + scipy.stats.norm.rvs(scale=delta3, size=X[0, N1:-N2:N1, N2:-N2:N1].shape) 
 
-		X[N2:-N2:N1, N2:-N2:N1, 0] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
-		X[N2:-N2:N1, N2:-N2:N1,-1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N2:-N2:N1,-1].shape)
-		X[N2:-N2:N1, 0, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, N2:-N2:N1].shape)
-		X[N2:-N2:N1,-1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1,-1, N2:-N2:N1].shape)
-		X[0, N2:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, N2:-N2:N1].shape)
-		X[-1, N2:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[-1, N2:-N2:N1, N2:-N2:N1].shape)
 
-		if stage!=1:
-			X[N2:-N2:N1, N2:-N2:N1, N1:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N2:-N2:N1, N1:-N2:N1].shape)
-			X[N2:-N2:N1, N1:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N1:-N2:N1, N2:-N2:N1].shape)
-			X[N1:-N2:N1, N2:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N2:N1, N2:-N2:N1, N2:-N2:N1].shape)
-			
-		N1/=2
-		N2/=2
-		#print stage
-		#print X
+            X[N2:-N2:N1, N1:-N1:N1, N1:-N1:N1] = ( X[N2:-N2:N1, N1:-N1:N1, N1+N2:-N1+N2:N1] + X[N2:-N2:N1, N1:-N1:N1, N1-N2:-N1-N2:N1] +
+                                X[N2:-N2:N1, N1+N2:-N1+N2:N1, N1:-N1:N1] + X[N2:-N2:N1, N1-N2:-N1-N2:N1, N1:-N1:N1] + 
+                                X[2*N2::N1, N1:-N1:N1, N1:-N1:N1] + X[:-2*N2:N1, N1:-N1:N1, N1:-N1:N1] 
+                                )/6. + scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N1:-N1:N1, N1:-N1:N1].shape)
+            X[N1:-N1:N1, N2:-N2:N1, N1:-N1:N1] = ( X[N1:-N1:N1, N2:-N2:N1, N1+N2:-N1+N2:N1] + X[N1:-N1:N1, N2:-N2:N1, N1-N2:-N1-N2:N1] +
+                                X[ N1+N2:-N1+N2:N1, N2:-N2:N1,N1:-N1:N1] + X[ N1-N2:-N1-N2:N1, N2:-N2:N1,N1:-N1:N1] + 
+                                X[N1:-N1:N1, 2*N2::N1, N1:-N1:N1] + X[N1:-N1:N1, :-2*N2:N1, N1:-N1:N1]  
+                                )/6. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N1:N1, N2:-N2:N1, N1:-N1:N1].shape)
+            X[N1:-N1:N1, N1:-N1:N1, N2:-N2:N1] = ( X[N1:-N1:N1, N1+N2:-N1+N2:N1, N2:-N2:N1] + X[N1:-N1:N1, N1-N2:-N1-N2:N1, N2:-N2:N1] +
+                                X[N1+N2:-N1+N2:N1, N1:-N1:N1, N2:-N2:N1] + X[N1-N2:-N1-N2:N1, N1:-N1:N1, N2:-N2:N1] + 
+                                X[N1:-N1:N1, N1:-N1:N1, 2*N2::N1] + X[N1:-N1:N1, N1:-N1:N1, :-2*N2:N1]  
+                                )/6. + scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N1:N1, N1:-N1:N1, N2:-N2:N1].shape)
 
-	#X=scipy.stats.norm.rvs(size=[N+1,N+1,N+1])
-	return numpy.exp(X)
+        # random addition
+
+        X[0::N1, 0::N1, 0::N1] += scipy.stats.norm.rvs(scale=delta3, size=X[0::N1, 0::N1, 0::N1].shape)
+        X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N2:-N2:N1, N2:-N2:N1].shape)
+
+        X[N2:-N2:N1, N2:-N2:N1, 0] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N2:-N2:N1, 0].shape)
+        X[N2:-N2:N1, N2:-N2:N1,-1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N2:-N2:N1,-1].shape)
+        X[N2:-N2:N1, 0, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, 0, N2:-N2:N1].shape)
+        X[N2:-N2:N1,-1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1,-1, N2:-N2:N1].shape)
+        X[0, N2:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[0, N2:-N2:N1, N2:-N2:N1].shape)
+        X[-1, N2:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[-1, N2:-N2:N1, N2:-N2:N1].shape)
+
+        if stage!=1:
+            X[N2:-N2:N1, N2:-N2:N1, N1:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N2:-N2:N1, N1:-N2:N1].shape)
+            X[N2:-N2:N1, N1:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N2:-N2:N1, N1:-N2:N1, N2:-N2:N1].shape)
+            X[N1:-N2:N1, N2:-N2:N1, N2:-N2:N1] += scipy.stats.norm.rvs(scale=delta3, size=X[N1:-N2:N1, N2:-N2:N1, N2:-N2:N1].shape)
+            
+        N1/=2
+        N2/=2
+        #print stage
+        #print X
+
+    #X=scipy.stats.norm.rvs(size=[N+1,N+1,N+1])
+    return numpy.exp(X)
 
