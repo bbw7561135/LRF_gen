@@ -3,7 +3,6 @@ import numpy.fft
 import numpy.ma
 import math
 import scipy.stats
-import scipy.special
 import scipy.interpolate
 import warnings
 import mpmath
@@ -50,14 +49,7 @@ def cube_make_FFT(cube_half_length, ps, m_func=None, s_func=None,
     ps_cube = numpy.fft.ifftshift(ps_cube, axes=(0, 1))
 
     # correction for non-filling when L << 1/kmax
-    # factor of 1.25 is a fudge for cube -> sphere approximation
-    kmax = cube_half_length * 1.25
-    correction = (scipy.special.hyp2f1(1.5 + ps.omega, ps.gamma/2 + ps.omega,
-                                       2.5 + ps.omega,
-                                       -pow(ps.L * kmax,2))
-                  * pow(kmax, 3) * pow(ps.L*kmax, 2*ps.omega)
-                  / (3 + 2*ps.omega)) * 4 * math.pi / ps.norm_const()
-    ps_cube /= correction
+    ps_cube /= ps.fill_correction(cube_half_length)
 
     ps_cube = numpy.sqrt(numpy.abs(ps_cube))
     cube = cube*ps_cube[:, :, :cube_half_length+1]

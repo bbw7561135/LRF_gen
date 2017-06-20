@@ -110,8 +110,36 @@ class SM14Powerspec(IsmPowerspec):
         norm_const = 4*math.pi * (scipy.special.beta((self.gamma-3)/2,
                                                      1.5+self.omega)
                                   / (2 * math.pow(self.L, 3)))
-
         return norm_const
+
+    def fill_correction(self, cube_half_length):
+        """ fill_correction(kmax)
+
+            Determine approximately what proportion of the total power
+            is contained within a cubic array of maximum wavenumber kmax
+            in any direction
+
+            Attributes
+            ----------
+            cube_half_length : float
+                half the width/length/height of the cube
+
+            Returns
+            -------
+            fill_correction : float
+                The (approximate) proportion of the total power contained
+                within the array.
+        """
+        # factor of 1.25 is a fudge for cube -> sphere approximation
+        kmax = cube_half_length * 1.25
+        fill_correction = (scipy.special.hyp2f1(1.5 + self.omega,
+                                                self.gamma/2 + self.omega,
+                                                2.5 + self.omega,
+                                                -pow(self.L * kmax, 2))
+                           * pow(kmax, 3) * pow(self.L*kmax, 2*self.omega)
+                           / (3 + 2*self.omega)) * 4 * math.pi
+        fill_correction /= self.norm_const()
+        return fill_correction
 
     def __call__(self, k):
         """ __call__(k)
