@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 def cube_make_FFT(cube_half_length, ps, m_func=None, s_func=None, 
-                  scale_ratio=None):
+                  scale_ratio=None, mag_randoms=None, arg_randoms=None):
     half_cube_shape = (cube_half_length*2,
                        cube_half_length*2,
                        cube_half_length+1)
@@ -22,11 +22,16 @@ def cube_make_FFT(cube_half_length, ps, m_func=None, s_func=None,
     double_cube_shape = (cube_half_length*4, cube_half_length*4,
                          cube_half_length*4)
 
-    cube = scipy.stats.uniform.rvs(loc=0, scale=2*math.pi,
-                                   size=half_cube_shape)
+    if mag_randoms is None:
+        mag_randoms = numpy.random.randn(half_cube_shape[0],
+                                         half_cube_shape[1],
+                                         half_cube_shape[2])
 
-    cube = ((numpy.cos(cube) + 1j*numpy.sin(cube))
-            * numpy.random.randn(cube.shape[0], cube.shape[1], cube.shape[2]))
+    if arg_randoms is None:
+        arg_randoms = scipy.stats.uniform.rvs(loc=0, scale=2*math.pi,
+                                              size=half_cube_shape)
+
+    cube = (numpy.cos(arg_randoms) + 1j*numpy.sin(arg_randoms)) * mag_randoms
 
     if scale_ratio:
         k_cube = numpy.fromfunction(
