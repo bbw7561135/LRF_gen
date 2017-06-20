@@ -3,10 +3,12 @@ import numpy.fft
 import math
 import scipy.stats
 
-import FFT_gen
-import SRA_gen
-import plots
-import FFT_rect
+from . import FFT_gen
+from . import SRA_gen
+from . import plots
+from . import FFT_rect
+from .powerspec import SM14Powerspec
+
 
 
 def get_corr(cube):
@@ -85,31 +87,35 @@ def get_colcorr(cube):
 
 class LRF_cube:
 
-    def __init__(self, res, sigma, gamma, method, outer=0., m_func=None,
-                 s_func=None, scale_ratio=None):
+    def __init__(self, res, sigma, gamma, method, omega=0, outer=1.,
+                 m_func=None, s_func=None, scale_ratio=None):
+        # set up cubes sizes, etc
         self.res = res
-        self.gamma = gamma
-        self.method = method
-        self.outer_scale = outer
-
-        self.beta = gamma
         self.cube_size = pow(2, res)
         self.half_cube_size = pow(2, res-1)
         self.cube_shape = (self.cube_size, self.cube_size,
                            self.cube_size)
 
+        self.method = method
+
+        # set up for power spec
+        self.gamma = gamma
+        self.outer_scale = outer
+        self.sigma = sigma
+
         if method == "FFT":
-            self.cube = FFT_gen.cube_make_FFT(self.half_cube_size, self.beta,
-                                              self.outer_scale, sigma, m_func,
-                                              s_func, scale_ratio)
-        elif method == "FFT2":
-            self.cube = FFT_gen.cube_make_FFT2(self.half_cube_size, self.beta,
-                                               self.outer_scale, sigma)
+            self.ps = SM14Powerspec(gamma=self.gamma, omega=omega, 
+                                    L=self.outer_scale,
+                                    var=pow(self.sigma,2))
+            self.cube = FFT_gen.cube_make_FFT(self.half_cube_size, self.ps,
+                                              m_func=m_func,
+                                              s_func=s_func,
+                                              scale_ratio=scale_ratio)
         elif method == "SRA":
             self.cube = SRA_gen.cube_make_SRA(self.res, sigma,
-                                              (self.beta-3)/2.)
+                                              (self.gamma-3)/2.)
         elif method == "FFT2D":
-            self.cube = FFT_rect.rect_make_FFT(self.half_cube_size, self.beta,
+            self.cube = FFT_rect.rect_make_FFT(self.half_cube_size, self.gamma,
                                                self.outer_scale, sigma, m_func,
                                                s_func, scale_ratio)
         self.method = method
