@@ -36,8 +36,9 @@ def cube_make_FFT(cube_half_length, ps, m_func=None, s_func=None,
     if scale_ratio:
         k_cube = numpy.fromfunction(
                    lambda i, j, k:
-                   numpy.sqrt(pow((i-cube_half_length)*scale_ratio, 2)
-                              + pow(j-cube_half_length, 2)+pow(k, 2)),
+                   numpy.sqrt(pow((i-cube_half_length), 2)
+                              + pow(j-cube_half_length, 2)
+                              + pow(k*scale_ratio, 2)),
                    half_cube_shape)
 
     else:

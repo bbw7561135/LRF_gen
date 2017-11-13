@@ -88,7 +88,8 @@ def get_colcorr(cube):
 class LRF_cube:
 
     def __init__(self, res, sigma, gamma, method, omega=0, outer=1.,
-                 m_func=None, s_func=None, scale_ratio=None):
+                 m_func=None, s_func=None, scale_ratio=None, mag_randoms=None,
+                 arg_randoms=None):
         # set up cubes sizes, etc
         self.res = res
         self.cube_size = pow(2, res)
@@ -110,7 +111,9 @@ class LRF_cube:
             self.cube = FFT_gen.cube_make_FFT(self.half_cube_size, self.ps,
                                               m_func=m_func,
                                               s_func=s_func,
-                                              scale_ratio=scale_ratio)
+                                              scale_ratio=scale_ratio,
+                                              arg_randoms=arg_randoms,
+                                              mag_randoms=mag_randoms)
         elif method == "SRA":
             self.cube = SRA_gen.cube_make_SRA(self.res, sigma,
                                               (self.gamma-3)/2.)
